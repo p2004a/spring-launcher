@@ -6,7 +6,7 @@ const { parseReplay } = require('../replay_utils');
 bridge.on('ReadReplayInfo', async command => {
 	try {
 		const info = await parseReplay(
-			springPlatform.writePath, command.relativePath, false
+			springPlatform.writePath, command.relativePath
 		);
 		bridge.send('ReplayInfo', info);
 	} catch (err) {

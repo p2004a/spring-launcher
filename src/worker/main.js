@@ -27,7 +27,7 @@ ipcRenderer.on('start-indexing-replays', (ev, springPath) => {
 				// Parse replays, for the sole purpose of creating the cache files.
 				// We ignore the return value because we don't need it here, we're
 				// only interested in side effects.
-				parseReplay(springPath, path.join('demos', file), true);
+				parseReplay(springPath, path.join('demos', file));
 			} catch (err) {
 				console.error(`Error parsing file: ${file}`);
 			}
