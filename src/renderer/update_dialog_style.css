@@ -33,12 +33,28 @@ body::-webkit-scrollbar {
 }
 
 #dialog-release-notes-text {
-  background-color: white;
+  background-color: #0d1117;
   user-select: text;
   padding: 15px;
   overflow-y: auto;
   margin-top: 5px;
   border-radius: 3px;
+  border: 1px solid #888;
+}
+
+#dialog-release-notes-text::-webkit-scrollbar {
+  width: 12px;
+}
+
+#dialog-release-notes-text::-webkit-scrollbar-thumb {
+  background: #666;
+  border-radius: 20px;
+  background-clip: content-box;
+  border: 3px solid transparent;
+}
+
+#dialog-release-notes-text::-webkit-scrollbar-track {
+  background: transparent;
 }
 
 #dialog-buttons {
