@@ -33,9 +33,7 @@ function getTemporaryFileName(baseName) {
 }
 
 function removeTemporaryFiles() {
-	if (fs.existsSync(TMP_DIR)) {
-		fs.rmdirSync(TMP_DIR, { recursive: true });
-	}
+	fs.rmSync(TMP_DIR, { recursive: true, force: true });
 }
 
 // This is pretty awful, but I don't want to rewrite all the code to be

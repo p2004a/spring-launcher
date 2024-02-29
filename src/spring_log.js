@@ -13,6 +13,8 @@ const { config } = require('./launcher_config');
 var logBuffer = [];
 var ready = false;
 let gui = null;
+// We never want to forward main binary logs to the renderer dev console.
+log.transports.ipc.level = false;
 log.transports.console = (msg) => {
 	var text = format.apply(util, msg.data);
 	console.log(text);

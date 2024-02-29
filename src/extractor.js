@@ -67,7 +67,7 @@ class Extractor extends EventEmitter {
 				}
 				try {
 					log.info(`Deleting temp destination after extraction has failed: ${tmpDestination}`);
-					fs.rmdirSync(tmpDestination, { recursive: true });
+					fs.rmSync(tmpDestination, { recursive: true });
 				} catch (error) {
 					log.error(`Cannot unlink temp file after extracting: ${tmpDestination}: ${error}`);
 				}
