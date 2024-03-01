@@ -12,17 +12,6 @@ class PrdDownloader extends EventEmitter {
 	constructor() {
 		super();
 		this.progressPattern = new RegExp('[0-9]+/[0-9]+');
-		this.missingPattern = new RegExp('.*no engine.*|.*no mirrors.*|.*no game found.*|.*no map found.*|.*error occured while downloading.*');
-	}
-
-	errorCheck(name, line) {
-		if (line.startsWith('[Error]')) {
-			if (line.toLowerCase().match(this.missingPattern)) {
-				this.emit('failed', name, line);
-				return true;
-			}
-		}
-		return false;
 	}
 
 	downloadPackage(name, args) {
@@ -33,7 +22,9 @@ class PrdDownloader extends EventEmitter {
 				this.emit('failed', name,
 					'\'pr-downloader.exe\' file is missing. This issue may be caused by an ' +
 					'antivirus program, such as Avast, accidentally deleting the file. ' +
-					'Please ensure your antivirus is up-to-date and reinstall the game.');
+					'Please ensure your antivirus is up-to-date (or e.g., '+
+					'<a target="_blank" href="https://www.google.com/search?q=How+to+add+a+folder+to+%3Cyour+antivirus%3E+antivirus+exclusion+list">'+
+					'add install folder to exceptions list</a>), and reinstall the game.');
 			} else {
 				this.emit('failed', name,
 					'pr-downloader binary not found in the installation directory.');
@@ -57,8 +48,6 @@ class PrdDownloader extends EventEmitter {
 				current = parseInt(current);
 				total = parseInt(total);
 				this.emit('progress', name, current, total);
-			} else if (this.errorCheck(name, line)) {
-				finished = true;
 			} else if (line.startsWith('[Info]')) {
 				this.emit('info', name, line);
 			}
@@ -67,11 +56,7 @@ class PrdDownloader extends EventEmitter {
 		prd.stderr.on('data', (data) => {
 			const line = data.toString();
 			log.warn(line);
-			if (this.errorCheck(name, line)) {
-				finished = true;
-			}
 		});
-
 
 		prd.on('close', (code) => {
 			if (finished) { // the process already counts as finished
@@ -79,6 +64,8 @@ class PrdDownloader extends EventEmitter {
 			}
 			if (code == 0) {
 				this.emit('finished', name);
+			} else if (code == 5) {
+				this.emit('failed', name, 'Failed to download: disk too full. Need a least 1 GiB free.');
 			} else {
 				this.emit('failed', name, `Download failed: ${name}: ${code}`);
 			}
