@@ -11,7 +11,7 @@ const { gui } = require('./launcher_gui');
 const updater = require('./updater');
 const springDownloader = require('./spring_downloader');
 const { launcher } = require('./engine_launcher');
-const { handleConfigUpdate } = require('./launcher_config_update');
+const { handleConfigUpdate, handleConfigReload } = require('./launcher_config_update');
 const fs = require('fs');
 const got = require('got');
 
@@ -51,8 +51,15 @@ class Wizard extends EventEmitter {
 					action: () => {
 						return new Promise(resolve => {
 							got(config.config_url, { timeout: { request: 5000 } }).json()
-								.then(newConfig => resolve({newConfig, error: null}))
-								.catch(error => resolve({data: null, error}));
+								.then(newRawConfig => {
+									try {
+										const [newConfig, reloadType] = handleConfigUpdate(newRawConfig);
+										resolve({newConfig, reloadType, error: null});
+									} catch (error) {
+										resolve({newConfig: null, reloadType: null, error});
+									}
+								})
+								.catch(error => resolve({newConfig: null, reloadType: null, error}));
 						});
 					}
 				};
@@ -62,19 +69,14 @@ class Wizard extends EventEmitter {
 					name: 'config update',
 					action: () => {
 						log.info(`Checking for config update from: ${config.config_url}...`);
-						asyncConfigFetch.promise.then(({newConfig, error}) => {
+						asyncConfigFetch.promise.then(({newConfig, reloadType, error}) => {
 							if (error) {
 								if (error.code == 'ERR_CANCELED') {
 									return;
 								}
 								log.error(`Failed to get config update. Error: ${error}, ignoring`);
 							} else {
-								try {
-									handleConfigUpdate(newConfig);
-								} catch (err) {
-									log.error('Failed to update config file. Ignoring.');
-									log.error(err);
-								}
+								handleConfigReload(newConfig, reloadType);
 							}
 							wizard.nextStep();
 						});

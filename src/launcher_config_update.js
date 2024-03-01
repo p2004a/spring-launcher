@@ -25,11 +25,15 @@ function handleConfigUpdate(newConfig) {
 
 	const finalConfigPath = path.join(writePath, 'config.json');
 	if (reloadType != 'identical' || !fs.existsSync(finalConfigPath)) {
+		log.info('Writing new version of config.json to disk');
 		const tmpConfigFile = path.join(writePath, 'config.new.json');
 		fs.writeFileSync(tmpConfigFile, newConfigStr);
 		renameSyncWithRetry(tmpConfigFile, finalConfigPath);
 	}
+	return [newConfig, reloadType];
+}
 
+function handleConfigReload(newConfig, reloadType) {
 	switch (reloadType) {
 		case 'identical':
 			log.info('Config files are identical');
@@ -72,5 +76,6 @@ function handleConfigUpdate(newConfig) {
 }
 
 module.exports = {
-	handleConfigUpdate: handleConfigUpdate,
+	handleConfigUpdate,
+	handleConfigReload,
 };
