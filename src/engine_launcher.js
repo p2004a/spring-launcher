@@ -5,6 +5,7 @@ const EventEmitter = require('events');
 const { spawn } = require('child_process');
 const { resolve } = require('path');
 const fs = require('fs');
+const path = require('path');
 
 const log = require('electron-log');
 
@@ -165,6 +166,33 @@ class Launcher extends EventEmitter {
 		// Since we don't want to impose such restriction to Spring, we explicitly make it resizable before launching
 		const oldResizable = gui.getMainWindow().resizable;
 		gui.getMainWindow().resizable = true;
+
+		if (!fs.existsSync(enginePath)) {
+			setImmediate(() => {
+				this.state = 'failed';
+				this.emit('failed',
+					'Failed to launch: Engine binary not found. This sometimes happens '+
+					'during engine upadates when a new version is incorrectly deleted or '+
+					'blocked by antivirus. Resolve the issue with antivirus (E.g., '+
+					'<a target="_blank" href="https://www.google.com/search?q=How+to+add+a+folder+to+%3Cyour+antivirus%3E+antivirus+exclusion+list">'+
+					'add install folder to exceptions list</a>) and restart '+
+					'the launcher.');
+				if (!config.disable_engine_folder_deletion) {
+					const engineDir = path.dirname(enginePath);
+					log.info(`Deleting the engine directory ${enginePath} to retry on next run.`);
+					fs.rm(engineDir, {
+						force: true,
+						recursive: true,
+						maxRetries: 5
+					}, (err) => {
+						if (err) {
+							log.error(`Failed to remove engine directory: ${err}`);
+						}
+					});
+				}
+			});
+			return;
+		}
 
 		log.info(`Launching Spring with command: ${enginePath} ${args.join(' ')}`);
 		const spring = spawn(enginePath, args,

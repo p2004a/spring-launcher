@@ -40,6 +40,10 @@ const defaultSetup = {
 	// of launcher is available or the update is just started right away.
 	'disable_launcher_update_dialog': false,
 
+	// Whatever the launcher should remove the whole engine folder in case there
+	// is issue with spawning the engine because engine binary is not found.
+	'disable_engine_folder_deletion': false,
+
 	// Default values for environment variables to be set for all the executed
 	// child processes like pr-downloader.
 	'env_variables': {},
