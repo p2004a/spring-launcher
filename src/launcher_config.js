@@ -55,6 +55,13 @@ const defaultSetup = {
 		'resources': [],
 	},
 
+	// A map from file name to file contents to write in the data directory
+	// Can be used e.g. for chobby_config.json, but really up to imagination.
+	// Setup entry doesn't override the top level entry, but if merged, when
+	// setup file entry overrides the config file entry.
+	// Set value to null to delete file.
+	'json_files': {},
+
 	'launch': {
 		'start_args': [],
 		'game': undefined,
@@ -158,6 +165,15 @@ function applyDefaults(conf) {
 		// Properties that need to be accesible from rendering process.
 		if (!setup.error_suffix) setup.error_suffix = conf.error_suffix;
 		if (!setup.links) setup.links = conf.links;
+
+		// We handle json_files in a special way, because we need to merge with
+		// global.
+		for (const [file, val] of Object.entries(conf.json_files || {})) {
+			if (!(file in setup.json_files)) {
+				setup.json_files[file] = val;
+			}
+		}
+
 		conf.setups[i] = setup;
 	}
 	return conf;

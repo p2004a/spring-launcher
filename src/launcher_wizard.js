@@ -134,6 +134,41 @@ class Wizard extends EventEmitter {
 				});
 			});
 
+			Object.entries(config.json_files).forEach(([file, contents]) => {
+				steps.push({
+					name: 'write file',
+					item: file,
+					action: () => {
+						const filePath = path.join(springPlatform.writePath, file);
+
+						const reportError = (msg) => {
+							log.error(msg);
+							gui.send('error', msg);
+							wizard.setEnabled(false);
+						};
+
+						if (contents === null) {
+							fs.rm(filePath, { force: true }, (err) => {
+								if (err) {
+									reportError(`Failed to remove file ${file}: ${err}`);
+								} else {
+									wizard.nextStep();
+								}
+							});
+						} else {
+							const buffer = JSON.stringify(contents, null, 2);
+							fs.writeFile(filePath, buffer, (err) => {
+								if (err) {
+									reportError(`Failed write ${file}: ${err}`);
+								} else {
+									wizard.nextStep();
+								}
+							});
+						}
+					}
+				});
+			});
+
 			if (pushConfigFetchActionAtEnd) {
 				steps.push(pushConfigFetchActionAtEnd);
 			}
