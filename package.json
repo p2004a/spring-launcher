@@ -38,6 +38,11 @@
         "bin/pr-downloader.exe",
         "bin/*.dll"
       ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "perMachine": false
     }
   },
   "dependencies": {
